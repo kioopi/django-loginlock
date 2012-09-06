@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-import loginlock
+execfile('loginlock/version.py')
 
 setup(
     name='django-loginlock',
-    version=loginlock.__version__,
+    version=__version__,
     description="""Block login from user/ip combination after a number
 of failed login attempts in Django projects.""",
     long_description=open('README.md', 'r').read(),

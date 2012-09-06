@@ -1,9 +1,11 @@
 import sys
-from models import LoginCandidate
 from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.views.generic.simple import direct_to_template
 
-from settings import LOGINLOCK_USERNAME_FIELD_NAME
-from settings import LOGINLOCK_LOGIN_VIEWS
+from models import LoginCandidate
+
+from settings import LOGINLOCK_USERNAME_FIELD_NAME, LOGINLOCK_LOGIN_VIEWS, LOGINLOCK_LOCKED_TEMPLATE
 
 LOCK_MESSAGE = "Account is locked"
 
@@ -88,16 +90,20 @@ class LoginLocker(object):
         def decorated_view(request, *args, **kwargs):
             if request.method == 'POST':
                 if self.track_login_attempt(request).is_locked():
-                    return HttpResponse(LOCK_MESSAGE, status=403)
-            else:
-                if self.is_locked(request):
-                    return HttpResponse(LOCK_MESSAGE, status=403)
+                    return self.locked_response(request)
 
             return login_func(request, *args, **kwargs)
 
         decorated_view.__LOGINLOCK_DECORATOR__ = True
 
         return decorated_view
+
+    def locked_response(self, request):
+        if LOGINLOCK_LOCKED_TEMPLATE:
+            return direct_to_template(request,
+                                      template=LOGINLOCK_LOCKED_TEMPLATE,
+                                      status=403)
+        return HttpResponse(LOCK_MESSAGE, status=403)
 
 
 def _get_module_and_func(modulestring):

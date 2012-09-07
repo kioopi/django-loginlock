@@ -1,7 +1,6 @@
 import sys
 from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.views.generic.simple import direct_to_template
+from django.shortcuts import render
 
 from models import LoginCandidate
 
@@ -98,9 +97,7 @@ class LoginLocker(object):
 
     def locked_response(self, request):
         if LOGINLOCK_LOCKED_TEMPLATE:
-            return direct_to_template(request,
-                                      template=LOGINLOCK_LOCKED_TEMPLATE,
-                                      status=403)
+            return render(request, LOGINLOCK_LOCKED_TEMPLATE, status=403)
         return HttpResponse(LOCK_MESSAGE, status=403)
 
 

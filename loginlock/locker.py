@@ -24,8 +24,6 @@ class LoginLocker(object):
         username = self.get_username(request)
         ip_address = self.get_ip_address(request)
 
-        print 'tracking ', username, ip_address
-
         candidate, was_created = LoginCandidate.objects.get_or_create(
                                        username=username, ip_address=ip_address)
         candidate.attempt_count += 1

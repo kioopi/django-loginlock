@@ -3,14 +3,14 @@ from django.conf import settings as dsettings
 # from django.contrib.auth import views as auth_views
 # from django.utils.importlib import import_module
 
-# should timezone be used? is there a difference in timedelta
+# should timezone be used? is there a difference in timedelta?
 # try:
 #     from django.utils import timezone as datetime
 # except ImportError:
 #     from datetime import datetime
 
 
-LOGINLOCK_MAX_TRIES = int(getattr(dsettings, 'LOGINLOCK_MAX_TRIES ', 2))
+LOGINLOCK_MAX_TRIES = int(getattr(dsettings, 'LOGINLOCK_MAX_TRIES', 5))
 LOGINLOCK_LOCK_TIMEOUT = getattr(dsettings, 'LOGINLOCK_LOCK_TIMEOUT ',
                                             datetime.timedelta(minutes=15))
 LOGINLOCK_USERNAME_FIELD_NAME = str(getattr(dsettings,

@@ -11,7 +11,7 @@ from django.conf import settings as dsettings
 
 
 LOGINLOCK_MAX_TRIES = int(getattr(dsettings, 'LOGINLOCK_MAX_TRIES', 5))
-LOGINLOCK_LOCK_TIMEOUT = getattr(dsettings, 'LOGINLOCK_LOCK_TIMEOUT ',
+LOGINLOCK_LOCK_TIMEOUT = getattr(dsettings, 'LOGINLOCK_LOCK_TIMEOUT',
                                             datetime.timedelta(minutes=15))
 LOGINLOCK_USERNAME_FIELD_NAME = str(getattr(dsettings,
                                  'LOGINLOCK_USERNAME_FIELD_NAME', 'username'))

@@ -17,12 +17,14 @@ class LoginCandidate(models.Model):
         return self.attempt_count >= LOGINLOCK_MAX_TRIES
     tried_too_often.boolean = True
 
-    def lock_timed_out(self):
-        return datetime.now() > self.timestamp + LOGINLOCK_LOCK_TIMEOUT
+    def lock_timed_out(self, timestamp=None):
+        if not timestamp:
+            timestamp = datetime.now()
+        return timestamp > self.timestamp + LOGINLOCK_LOCK_TIMEOUT
     lock_timed_out.boolean = True
 
-    def is_locked(self):
-        return self.tried_too_often() and not self.lock_timed_out()
+    def is_locked(self, timestamp=None):
+        return self.tried_too_often() and not self.lock_timed_out(timestamp)
     is_locked.boolean = True
 
     def __unicode__(self):

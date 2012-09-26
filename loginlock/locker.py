@@ -11,22 +11,21 @@ LOCK_MESSAGE = "Account is locked"
 
 class LoginLocker(object):
     """
-    This class holds the main functionality of loginlock.  This is not just a
+    This class holds the main functionality of loginlock.  This is just a
     collection of functions in order to make it possible alter functionality via
     subclassing.
     """
-    def track_login_attempt(self, request):
+    def track_login_attempt(self, request, candidate=False):
         """
         Takes a request object (with POST-data to log-in a user) and
         creates a model-instance to record the login-attempt.
         """
-        username = self.get_username(request)
-        ip_address = self.get_ip_address(request)
 
-        candidate, was_created = LoginCandidate.objects.get_or_create(
-                                       username=username, ip_address=ip_address)
-        candidate.attempt_count += 1
-        candidate.save()
+        candidate = candidate or self.get_candidate(request)
+
+        if not request.user.is_authenticated() and request.method == 'POST':
+            candidate.track_attempt()
+
         return candidate
 
     def is_locked(self, request):
@@ -37,14 +36,18 @@ class LoginLocker(object):
         username = self.get_username(request)
         if not username:
             return False
-        ip_address = self.get_ip_address(request)
 
-        print 'check lock ', username, ip_address
+        candidate = self.get_candidate(request, username)
+
+        return candidate.is_locked()
+
+    def get_candidate(self, request, username=None):
+        username = username or self.get_username(request)
+        ip_address = self.get_ip_address(request)
 
         candidate, was_created = LoginCandidate.objects.get_or_create(
                                        username=username, ip_address=ip_address)
-
-        return candidate.is_locked()
+        return candidate
 
     def get_username(self, request):
         return request.POST.get(LOGINLOCK_USERNAME_FIELD_NAME, None)
@@ -53,11 +56,7 @@ class LoginLocker(object):
         return request.META.get('REMOTE_ADDR', '')
 
     def reset_attempts(self, user, request):
-        username = user.username
-        ip_address = self.get_ip_address(request)
-
-        candidate, was_created = LoginCandidate.objects.get_or_create(
-                                      username=username, ip_address=ip_address)
+        candidate = self.get_candidate(request, user.username)
 
         candidate.attempt_count = 0
         candidate.save()
@@ -79,7 +78,7 @@ class LoginLocker(object):
                 self.watch_login_attempts(view))
 
     def watch_login_attempts(self, login_func):
-        """ Takes a view function and decorates it to..."""
+        """ Takes a view function and decorates it to... """
 
         if hasattr(login_func, '__LOGINLOCK_DECORATOR__'):
             return login_func

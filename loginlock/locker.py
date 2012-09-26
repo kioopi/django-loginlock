@@ -6,12 +6,10 @@ from models import LoginCandidate
 
 from django.conf import settings
 
-
-LOGINLOCK_USERNAME_FIELD_NAME = str(getattr(settings,
-                                   'LOGINLOCK_USERNAME_FIELD_NAME', 'username'))
-LOGINLOCK_LOGIN_VIEWS = getattr(settings, 'LOGINLOCK_LOGIN_VIEWS',
-                                             ['django.contrib.auth.view.login'])
-LOGINLOCK_LOCKED_TEMPLATE = getattr(settings, 'LOGINLOCK_LOCKED_TEMPLATE', None)
+# settings defaults
+USERNAME_FIELD_NAME = 'username'
+LOGIN_VIEWS = ['django.contrib.auth.view.login']
+LOCKED_TEMPLATE = None
 
 # TODO: string should be in settings or locker and localized
 LOCK_MESSAGE = "Account is locked"
@@ -28,7 +26,6 @@ class LoginLocker(object):
         Takes a request object (with POST-data to log-in a user) and
         creates a model-instance to record the login-attempt.
         """
-
         candidate = candidate or self.get_candidate(request)
 
         if not request.user.is_authenticated() and request.method == 'POST':
@@ -58,7 +55,10 @@ class LoginLocker(object):
         return candidate
 
     def get_username(self, request):
-        return request.POST.get(LOGINLOCK_USERNAME_FIELD_NAME, None)
+        fieldname = str(getattr(settings, 'LOGINLOCK_USERNAME_FIELD_NAME',
+                                                        USERNAME_FIELD_NAME))
+
+        return request.POST.get(fieldname, None)
 
     def get_ip_address(self, request):
         return request.META.get('REMOTE_ADDR', '')
@@ -70,7 +70,9 @@ class LoginLocker(object):
         candidate.save()
 
     def get_login_views(self):
-        return map(_get_callable, LOGINLOCK_LOGIN_VIEWS)
+        views = getattr(settings, 'LOGINLOCK_LOGIN_VIEWS', LOGIN_VIEWS)
+
+        return map(_get_callable, views)
 
     def decorate_views(self):
         """
@@ -108,8 +110,10 @@ class LoginLocker(object):
         return decorated_view
 
     def locked_response(self, request):
-        if LOGINLOCK_LOCKED_TEMPLATE:
-            return render(request, LOGINLOCK_LOCKED_TEMPLATE, status=403)
+        template = getattr(settings, 'LOGINLOCK_LOCKED_TEMPLATE',
+                                                       LOCKED_TEMPLATE)
+        if template:
+            return render(request, template, status=403)
         return HttpResponse(LOCK_MESSAGE, status=403)
 
 

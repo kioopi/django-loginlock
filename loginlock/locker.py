@@ -85,8 +85,13 @@ class LoginLocker(object):
 
         def decorated_view(request, *args, **kwargs):
             if request.method == 'POST':
-                if self.track_login_attempt(request).is_locked():
+                candidate = self.get_candidate(request)
+                if candidate.is_locked():
                     return self.locked_response(request)
+
+                response = login_func(request, *args, **kwargs)
+                self.track_login_attempt(request, candidate)
+                return response
 
             return login_func(request, *args, **kwargs)
 

@@ -4,8 +4,16 @@ from django.shortcuts import render
 
 from models import LoginCandidate
 
-from settings import LOGINLOCK_USERNAME_FIELD_NAME, LOGINLOCK_LOGIN_VIEWS, LOGINLOCK_LOCKED_TEMPLATE
+from django.conf import settings
 
+
+LOGINLOCK_USERNAME_FIELD_NAME = str(getattr(settings,
+                                   'LOGINLOCK_USERNAME_FIELD_NAME', 'username'))
+LOGINLOCK_LOGIN_VIEWS = getattr(settings, 'LOGINLOCK_LOGIN_VIEWS',
+                                             ['django.contrib.auth.view.login'])
+LOGINLOCK_LOCKED_TEMPLATE = getattr(settings, 'LOGINLOCK_LOCKED_TEMPLATE', None)
+
+# TODO: string should be in settings or locker and localized
 LOCK_MESSAGE = "Account is locked"
 
 

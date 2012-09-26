@@ -4,7 +4,11 @@ except ImportError:
     from datetime import datetime
 
 from django.db import models
-from loginlock.settings import LOGINLOCK_MAX_TRIES, LOGINLOCK_LOCK_TIMEOUT
+from django.conf import settings
+
+LOGINLOCK_MAX_TRIES = int(getattr(settings, 'LOGINLOCK_MAX_TRIES', 5))
+LOGINLOCK_LOCK_TIMEOUT = getattr(settings, 'LOGINLOCK_LOCK_TIMEOUT',
+                                           datetime.timedelta(minutes=15))
 
 
 class LoginCandidate(models.Model):

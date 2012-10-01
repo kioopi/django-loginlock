@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from models import LoginCandidate
+from loginlock.nullcandidate import NullCandidate
 
 from django.conf import settings
 
@@ -49,6 +50,12 @@ class LoginLocker(object):
     def get_candidate(self, request, username=None):
         username = username or self.get_username(request)
         ip_address = self.get_ip_address(request)
+
+        # in case there is no chance for a request to be locked,
+        # return a NullObject-Candidate that is always unlocked.
+        # Does not hit the DB.
+        if not request.method == 'POST' or username is None:
+            return NullCandidate()
 
         candidate, was_created = LoginCandidate.objects.get_or_create(
                                        username=username, ip_address=ip_address)

@@ -1,11 +1,12 @@
 import sys
+
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.conf import settings
 
-from models import LoginCandidate
+from loginlock.models import LoginCandidate
 from loginlock.nullcandidate import NullCandidate
 
-from django.conf import settings
 
 # settings defaults
 USERNAME_FIELD_NAME = 'username'

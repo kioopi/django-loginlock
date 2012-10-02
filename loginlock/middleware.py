@@ -1,6 +1,8 @@
 from django.conf import settings as django_settings
-import locker
-Locker = getattr(django_settings, 'LOGINLOCK_LOCKER_CLASS', locker.LoginLocker)
+import loginlock.locker
+
+Locker = getattr(django_settings, 'LOGINLOCK_LOCKER_CLASS',
+                                  loginlock.locker.LoginLocker)
 
 
 class LoginLockMiddleware(object):
